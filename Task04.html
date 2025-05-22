@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sudoku Solver</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    td {
+      border: 1px solid #000;
+      width: 40px;
+      height: 40px;
+    }
+    input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 18px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sudoku Solver</h1>
+  <table id="sudoku-grid"></table>
+  <button onclick="solveSudoku()">Solve</button>
 
+  <script>
+    // Create 9x9 input grid
+    const grid = document.getElementById("sudoku-grid");
+    for (let row = 0; row < 9; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col < 9; col++) {
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+        input.setAttribute("type", "number");
+        input.setAttribute("min", "1");
+        input.setAttribute("max", "9");
+        input.setAttribute("id", `cell-${row}-${col}`);
+        td.appendChild(input);
+        tr.appendChild(td);
+      }
+      grid.appendChild(tr);
+    }
+
+    // Read input and create 2D array
+    function getBoard() {
+      const board = [];
+      for (let i = 0; i < 9; i++) {
+        const row = [];
+        for (let j = 0; j < 9; j++) {
+          const val = document.getElementById(`cell-${i}-${j}`).value;
+          row.push(val ? parseInt(val) : 0);
+        }
+        board.push(row);
+      }
+      return board;
+    }
+
+    // Display result on grid
+    function setBoard(board) {
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          document.getElementById(`cell-${i}-${j}`).value = board[i][j];
+        }
+      }
+    }
+
+    // Check if num can be placed
+    function isSafe(board, row, col, num) {
+      for (let x = 0; x < 9; x++) {
+        if (board[row][x] === num || board[x][col] === num) return false;
+      }
+
+      const startRow = row - row % 3;
+      const startCol = col - col % 3;
+
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (board[i + startRow][j + startCol] === num) return false;
+        }
+      }
+
+      return true;
+    }
+
+    // Backtracking solver
+    function solve(board) {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (board[row][col] === 0) {
+            for (let num = 1; num <= 9; num++) {
+              if (isSafe(board, row, col, num)) {
+                board[row][col] = num;
+                if (solve(board)) return true;
+                board[row][col] = 0;
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function solveSudoku() {
+      const board = getBoard();
+      if (solve(board)) {
+        setBoard(board);
+        alert("Solved successfully!");
+      } else {
+        alert("No solution exists.");
+      }
+    }
+  </script>
+</body>
+</html>
